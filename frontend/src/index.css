@@ -1,0 +1,17 @@
+html,
+body {
+    margin: 0;
+    height: 100%;
+}
+
+#root {
+    display: grid;
+    grid-template-columns: 100%;
+    align-items: center;
+    gap: 30px;
+    min-height: 100%;
+    width: min(90%, 1140px);
+    margin: 0 auto;
+    padding: 5% 0;
+    box-sizing: border-box;
+}
