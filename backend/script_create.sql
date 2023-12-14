@@ -21,6 +21,18 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: admin; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.admin (
+    username text,
+    password text
+);
+
+
+ALTER TABLE public.admin OWNER TO postgres;
+
+--
 -- Name: info_text; Type: TABLE; Schema: public; Owner: postgres
 --
 
