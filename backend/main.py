@@ -2,17 +2,22 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 import pydantic
 import psycopg2
-from settings_db import *
+from settings_db import settings_DB
 from typing import Annotated
 import json
 
 app = FastAPI()
 security = HTTPBasic()
 
-'''
-не настроен settings!!!!
-'''
-DATABASE_URL = f"postgresql://{username}:{password}@{host}:{port}/{database}"
+def connect_db(settings_DB):
+    con = psycopg2.connect(
+        database=settings_DB.database,
+        user=settings_DB.admin,
+        password=settings_DB.password,
+        host=settings_DB.host,
+        port=settings_DB.port
+    )
+    return con
 
 class User(pydantic.BaseModel):
     user_id: int
@@ -27,13 +32,7 @@ class UserCredentials(pydantic.BaseModel):
 
 
 def all_record():
-    con = psycopg2.connect(
-        database=database,
-        user=username,
-        password=password,
-        host=host,
-        port=port
-    )
+    con = connect_db(settings_DB)
 
     cur = con.cursor()
     info_texts = get_info_texts_psycopg2(cur)
@@ -60,13 +59,7 @@ async def get_all_text():
 
 @app.put("/texts/{id}")
 async def change_result(id):
-    con = psycopg2.connect(
-        database=database,
-        user=username,
-        password=password,
-        host=host,
-        port=port
-    )
+    con = connect_db(settings_DB)
 
     cur = con.cursor()
     cur.execute(f"UPDATE info_text set result = True where id = {id}")
@@ -85,13 +78,7 @@ async def read_item(credentials : Annotated[HTTPBasicCredentials,
         "channel_data": user.channel_data,
     }
     
-    con = psycopg2.connect(
-    database=database,
-    user=username,
-    password=password,
-    host=host,
-    port=port
-    )
+    con = connect_db(settings_DB)
 
     cur = con.cursor()
     cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s", (credentials.username, credentials.password))
