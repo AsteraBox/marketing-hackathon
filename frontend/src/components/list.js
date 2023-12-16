@@ -15,11 +15,13 @@ export default () => {
 
     // Click handler
     const onClick = async (id) => {
-        const { data: { success } } = await confirm(id);
-        if (success) {
+        try {
+            await confirm(id).unwrap();
             dispatch(api.util.updateQueryData("getTexts", page, (data) => {
                 data.records = data.records?.map(el => ({ ...el, confirmed: el.confirmed || el.id === id }));
             }));
+        } catch (error) {
+            console.log(error);
         }
     }
 
