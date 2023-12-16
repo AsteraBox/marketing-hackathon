@@ -9,6 +9,7 @@ import json
 app = FastAPI()
 security = HTTPBasic()
 
+
 def connect_db(settings_DB):
     con = psycopg2.connect(
         database=settings_DB.database,
@@ -18,6 +19,7 @@ def connect_db(settings_DB):
         port=settings_DB.port
     )
     return con
+
 
 class User(pydantic.BaseModel):
     user_id: int
@@ -57,6 +59,7 @@ def page_record(page: int = 1, items_per_page: int = 10):
 
     return response_json
 
+
 def all_record():
     con = connect_db(settings_DB)
 
@@ -65,7 +68,7 @@ def all_record():
     cur.close()
     con.close()
     sorted_info_texts = sorted(info_texts, key=lambda x: x[0])
-    
+
     response_json = {"total": len(info_texts), "records": []}
 
     for info_text in sorted_info_texts:
@@ -79,10 +82,12 @@ def all_record():
 
     return response_json
 
+
 def get_info_texts_psycopg2(cursor):
     cursor.execute("SELECT * FROM info_text")
     info_texts = cursor.fetchall()
     return info_texts
+
 
 # @app.get("/texts")
 # async def get_all_text():
@@ -106,20 +111,21 @@ async def change_result(id):
 
 
 @app.post("/api/v1/data")
-async def read_item(credentials : Annotated[HTTPBasicCredentials, 
-                                            Depends(security)], user: User = Depends(), 
-):    
+async def read_item(credentials: Annotated[HTTPBasicCredentials,
+Depends(security)], user: User = Depends(),
+                    ):
     user_data_dict = {
         "user_id": user.user_id,
         "user_data": user.user_data,
         "product_data": user.product_data,
         "channel_data": user.channel_data,
     }
-    
+
     con = connect_db(settings_DB)
 
     cur = con.cursor()
-    cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s", (credentials.username, credentials.password))
+    cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s",
+                (credentials.username, credentials.password))
     admin_user = cur.fetchone()
 
     if admin_user:
@@ -134,8 +140,8 @@ async def read_item(credentials : Annotated[HTTPBasicCredentials,
         text = "Example text"
         # TODO:
         cur.execute("INSERT INTO info_text (json_input, text, result) VALUES (%s, %s, %s)",
-        (json.dumps(user_data_dict), text, False),
-    )
+                    (json.dumps(user_data_dict), text, False),
+                    )
 
         con.commit()
         cur.close()
@@ -148,5 +154,6 @@ async def read_item(credentials : Annotated[HTTPBasicCredentials,
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
 
 '''uvicorn main:app --host 127.0.0.1 --port 8000 --reload'''
