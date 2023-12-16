@@ -1,13 +1,16 @@
-from fastapi import FastAPI, Depends, HTTPException, status, Path
-from fastapi.security import HTTPBasicCredentials, HTTPBasic
 import pydantic
 import psycopg2
+import json
 from settings_db import settings_DB
 from typing import Annotated
-import json
+from fastapi import FastAPI, Depends, HTTPException, status, Path
+from fastapi.security import HTTPBasicCredentials, HTTPBasic
+
 
 app = FastAPI()
+
 security = HTTPBasic()
+
 
 def connect_db(settings_DB):
     con = psycopg2.connect(
@@ -18,6 +21,7 @@ def connect_db(settings_DB):
         port=settings_DB.port
     )
     return con
+
 
 class User(pydantic.BaseModel):
     user_id: int
@@ -57,9 +61,9 @@ def page_record(page: int = 1, items_per_page: int = 10):
 
     return response_json
 
+
 def all_record():
     con = connect_db(settings_DB)
-
     cur = con.cursor()
     info_texts = get_info_texts_psycopg2(cur)
     cur.close()
@@ -79,30 +83,57 @@ def all_record():
 
     return response_json
 
+
 def get_info_texts_psycopg2(cursor):
     cursor.execute("SELECT * FROM info_text")
     info_texts = cursor.fetchall()
     return info_texts
 
-# @app.get("/texts")
-# async def get_all_text():
-#     return all_record()
 
 @app.get("/texts")
-async def get_all_text(page: int = 0):
-    if page == 0:
-        return all_record()
-    return page_record(page=page)
+async def get_all_text( credentials : Annotated[HTTPBasicCredentials, 
+                                            Depends(security)], page: int = 0):
+    con = connect_db(settings_DB)
+    cur = con.cursor()
+    cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s", (credentials.username, credentials.password))
+    admin_user = cur.fetchone()
+    cur.close()
+    con.close()
+    if admin_user:
+        if page == 0:
+            return all_record()
+        return page_record(page=page)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 @app.put("/texts/{id}")
-async def change_result(id):
+async def change_result(
+    credentials : Annotated[HTTPBasicCredentials, 
+                                            Depends(security)],
+    id: int
+):
     con = connect_db(settings_DB)
-
     cur = con.cursor()
-    cur.execute(f"UPDATE info_text set result = True where id = {id}")
-    con.commit()
-    con.close()
+    cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s", (credentials.username, credentials.password))
+    admin_user = cur.fetchone()
+    if admin_user:
+        cur.execute(f"UPDATE info_text SET result = True WHERE id = {id}")
+        con.commit()
+        con.close()
+        cur.close()
+    else:
+        cur.close()
+        con.close()
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 @app.post("/api/v1/data")
@@ -117,7 +148,6 @@ async def read_item(credentials : Annotated[HTTPBasicCredentials,
     }
     
     con = connect_db(settings_DB)
-
     cur = con.cursor()
     cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s", (credentials.username, credentials.password))
     admin_user = cur.fetchone()
@@ -148,5 +178,3 @@ async def read_item(credentials : Annotated[HTTPBasicCredentials,
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
-'''uvicorn main:app --host 127.0.0.1 --port 8000 --reload'''
