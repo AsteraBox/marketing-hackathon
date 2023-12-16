@@ -39,10 +39,10 @@ app.get("/texts", function (req, res) {
     const { page = 1 } = req.query;
 
     const num = (page - 1) * 10;
-    let results = [];
+    let records = [];
 
     for (let i = 1; i <= 10; i++) {
-        results.push({
+        records.push({
             id: num + i,
             text: lorem.generateParagraphs(1),
             confirmed: false,
@@ -51,7 +51,7 @@ app.get("/texts", function (req, res) {
 
     const response = {
         total: 50,
-        results,
+        records,
     };
     
     res.send(response);

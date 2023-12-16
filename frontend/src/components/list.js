@@ -18,13 +18,13 @@ export default () => {
         const { data: { success } } = await confirm(id);
         if (success) {
             dispatch(api.util.updateQueryData("getTexts", page, (data) => {
-                data.results = data.results.map(el => ({ ...el, confirmed: el.confirmed || el.id === id }));
+                data.records = data.records?.map(el => ({ ...el, confirmed: el.confirmed || el.id === id }));
             }));
         }
     }
 
     // Fromat data
-    const dataSource = data?.results.map((el, index) => ({
+    const dataSource = data.records?.map((el, index) => ({
         ...el,
         key: index,
         button: !el.confirmed && (
@@ -32,7 +32,7 @@ export default () => {
                 Подтвердить
             </Button>
         ),
-    }));
+    })) || [];
 
     // Columns
     const columns = [
