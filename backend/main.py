@@ -39,10 +39,16 @@ def all_record():
     cur.close()
     con.close()
 
-    response_json = {}
+    response_json = {"total": len(info_texts), "records": []}
+
     for info_text in info_texts:
         print(f"ID: {info_text[0]}, JSON Input: {info_text[1]}, Text: {info_text[2]}, Result: {info_text[3]}")
-        response_json[info_text[0]] = info_text[2]
+        record_object = {
+            "id": info_text[0],
+            "text": info_text[2],
+            "confirmed": info_text[3],
+        }
+        response_json["records"].append(record_object)
 
     return response_json
 
