@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Path
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 import pydantic
 import psycopg2
@@ -31,7 +31,7 @@ class UserCredentials(pydantic.BaseModel):
     password: str
 
 
-def all_record():
+def page_record(page: int = 1, items_per_page: int = 10):
     con = connect_db(settings_DB)
 
     cur = con.cursor()
@@ -39,9 +39,36 @@ def all_record():
     cur.close()
     con.close()
 
+    start_index = (page - 1) * items_per_page
+    end_index = page * items_per_page
+
+    paginated_records = info_texts[start_index:end_index]
+
     response_json = {"total": len(info_texts), "records": []}
 
-    for info_text in info_texts:
+    for info_text in paginated_records:
+        print(f"ID: {info_text[0]}, JSON Input: {info_text[1]}, Text: {info_text[2]}, Result: {info_text[3]}")
+        record_object = {
+            "id": info_text[0],
+            "text": info_text[2],
+            "confirmed": info_text[3],
+        }
+        response_json["records"].append(record_object)
+
+    return response_json
+
+def all_record():
+    con = connect_db(settings_DB)
+
+    cur = con.cursor()
+    info_texts = get_info_texts_psycopg2(cur)
+    cur.close()
+    con.close()
+    sorted_info_texts = sorted(info_texts, key=lambda x: x[0])
+    
+    response_json = {"total": len(info_texts), "records": []}
+
+    for info_text in sorted_info_texts:
         print(f"ID: {info_text[0]}, JSON Input: {info_text[1]}, Text: {info_text[2]}, Result: {info_text[3]}")
         record_object = {
             "id": info_text[0],
@@ -57,10 +84,15 @@ def get_info_texts_psycopg2(cursor):
     info_texts = cursor.fetchall()
     return info_texts
 
+# @app.get("/texts")
+# async def get_all_text():
+#     return all_record()
 
 @app.get("/texts")
-async def get_all_text():
-    return all_record()
+async def get_all_text(page: int = 0):
+    if page == 0:
+        return all_record()
+    return page_record(page=page)
 
 
 @app.put("/texts/{id}")
