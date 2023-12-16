@@ -38,11 +38,11 @@ def page_record(page: int = 1, items_per_page: int = 10):
     info_texts = get_info_texts_psycopg2(cur)
     cur.close()
     con.close()
-
+    sorted_info_texts = sorted(info_texts, key=lambda x: x[0])
     start_index = (page - 1) * items_per_page
     end_index = page * items_per_page
 
-    paginated_records = info_texts[start_index:end_index]
+    paginated_records = sorted_info_texts[start_index:end_index]
 
     response_json = {"total": len(info_texts), "records": []}
 
