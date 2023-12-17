@@ -50,7 +50,7 @@ export default () => {
             key: "text",
         },
         {
-            title: "Подвердить",
+            title: "Подтвердить",
             dataIndex: "button",
             key: "button",
             align: "center"
