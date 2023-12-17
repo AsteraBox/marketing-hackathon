@@ -246,15 +246,18 @@ async def read_item(credentials : Annotated[HTTPBasicCredentials,
             response_data = response.json()
         else:
             print(f"Ошибка при запросе модели: {response.status_code}")
+            raise HTTPException(status_code=500, detail=f"Ошибка при запросе модели: {response.status_code}")
 
         # TODO:
         cur.execute("INSERT INTO info_text (json_input, text, result) VALUES (%s, %s, %s)",
-        (json.dumps(dict(client)), response_data["text"], False),
-    )
+            (json.dumps(dict(client)), response_data["text"], False),
+        )
 
         con.commit()
         cur.close()
         con.close()
+
+        return {"advertisement": response_data["text"]}
     else:
         cur.close()
         con.close()
