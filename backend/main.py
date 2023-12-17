@@ -5,6 +5,7 @@ from settings_db import settings_DB
 from typing import Annotated
 from fastapi import FastAPI, Depends, HTTPException, status, Path
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
+import requests
 
 
 app = FastAPI()
@@ -162,9 +163,27 @@ async def read_item(credentials : Annotated[HTTPBasicCredentials,
 
         # TODO: 
         text = "Example text"
+
+        example_promt = "Example promt"
+
+        query = {
+            "text": example_promt,
+            "top_k": 30,
+            "top_p": 0.9,
+            "temperature": 0.2,
+            "repeat_penalty": 1.1
+        }
+
+        response = requests.post("http://localhost:8080/generate", json=query)
+
+        if response.status_code == 200:
+            response_data = response.json()
+        else:
+            print(f"Ошибка при запросе модели: {response.status_code}")
+
         # TODO:
         cur.execute("INSERT INTO info_text (json_input, text, result) VALUES (%s, %s, %s)",
-        (json.dumps(user_data_dict), text, False),
+        (json.dumps(user_data_dict), response_data["text"], False),
     )
 
         con.commit()
