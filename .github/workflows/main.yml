@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: prepare .env file
         run: |
-          echo $ECS_ENV_RAW_CONTENT > .env
+          echo "$ECS_ENV_RAW_CONTENT" > .env
           echo ${{ secrets.ECS_ENV_DB_PASSWORD }} >> .env
       - name: run stack
         run: >
