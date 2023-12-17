@@ -25,9 +25,11 @@ jobs:
     steps:
       - name: prepare .env file
         run: |
-          echo ${{ vars.ECS_ENV_RAW_CONTENT }} > .env
+          echo $ECS_ENV_RAW_CONTENT > .env
           echo ${{ secrets.ECS_ENV_DB_PASSWORD }} >> .env
       - name: run stack
         run: >
           docker compose up
           -d --force-recreate
+    env:
+      ECS_ENV_RAW_CONTENT: ${{ vars.ECS_ENV_RAW_CONTENT }}
