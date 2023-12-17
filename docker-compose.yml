@@ -8,6 +8,7 @@ services:
       context: ./backend
     depends_on:
       - postgres
+      - model
     environment:
       username_db: "postgres"
       password: $POSTGRES_PASSWORD
@@ -48,6 +49,12 @@ services:
     volumes:
       - "./Caddyfile:/etc/caddy/Caddyfile"
       - "caddy_data:/data"
+
+  model:
+    image: marketing-llm:latest
+    build:
+      context: ./model
+    restart: always
 
 volumes:
   caddy_data:
