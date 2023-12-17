@@ -66,7 +66,7 @@ class PromtsGenerator:
     def generate_personalized_promt(self, service_key, sevice_features, channel_type_key, user_features):
         service = self.general_products[service_key]
         channel_type = self.connection_channels[channel_type_key]
-        user_features_text = self._get_user_features_text(user_features)
+        user_features_text = self._get_user_features_text(service_key, user_features)
         promt = f"Сгенерируй {channel_type} для {user_features_text}. Прорекламируй услугу '{service}'. {sevice_features}. "
         return promt
 
