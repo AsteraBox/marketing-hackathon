@@ -70,6 +70,7 @@ class PromtsGenerator:
         promt = f"Сгенерируй {channel_type} для {user_features_text}. Прорекламируй услугу '{service}'. {sevice_features}. "
         return promt
 
+promtsgenerator = PromtsGenerator()
 
 if __name__ == '__main__':
     promts_generator = PromtsGenerator()

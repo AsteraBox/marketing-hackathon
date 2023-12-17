@@ -171,7 +171,7 @@ Depends(security)], user: User = Depends(),
             "channel_data": user.channel_data,
         }
 
-        # TODO: 
+        # promt = promtsgenerator.generate_personalized_promt(product_key, product_features, channel_type_code, user_features_json)
         text = "Example text"
         # TODO:
         cur.execute("INSERT INTO info_text (json_input, text, result) VALUES (%s, %s, %s)",
