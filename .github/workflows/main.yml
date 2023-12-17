@@ -24,7 +24,7 @@ jobs:
     needs: build_images
     steps:
       - name: prepare .env file
-        run: >
+        run: |
           echo ${{ env.ECS_ENV_RAW_CONTENT }} > .env
           echo ${{ secrets.ECS_ENV_DB_PASSWORD }} >> .env
       - name: run stack
