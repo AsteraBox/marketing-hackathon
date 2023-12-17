@@ -1,8 +1,9 @@
 {$DOMAIN} {
   tls {$EMAIL}
   reverse_proxy /api* backend:8000
+  reverse_proxy /texts* backend:8000
   @backend-docs {
-    path /api/docs
+    path /api/docs*
     path /openapi.json
   }
   handle @backend-docs {
