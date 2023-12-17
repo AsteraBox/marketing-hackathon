@@ -31,7 +31,5 @@ jobs:
         run: >
           docker compose up
           -d --force-recreate
-      - name: cleanup
-        run: docker system prune -af
     env:
       ECS_ENV_RAW_CONTENT: ${{ vars.ECS_ENV_RAW_CONTENT }}
