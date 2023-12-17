@@ -1,6 +1,13 @@
 {$DOMAIN} {
   tls {$EMAIL}
   reverse_proxy /api* backend:8000
-  reverse_proxy /docs* backend:8000
+  @backend-docs {
+    path /api/docs
+    path /openapi.json
+  }
+  handle @backend-docs {
+    uri strip_prefix /api
+    reverse_proxy backend:8000
+  }
   reverse_proxy frontend:80
 }
