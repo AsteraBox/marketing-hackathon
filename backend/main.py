@@ -5,9 +5,10 @@ import json
 import requests
 
 from typing import Annotated
-from fastapi import FastAPI, Depends, HTTPException, status, Path
+from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
-from fastapi import HTTPException
+
+from pyd_models import User
 
 from settings_db import settings_DB
 from promtsgenerator import promtsgenerator
@@ -64,36 +65,6 @@ def connect_db(settings_DB):
         port=settings_DB.port
     )
     return con
-
-
-class Client(pydantic.BaseModel):
-    gender: int = None
-    age: float = None
-    reg_region_nm: str = None
-    cnt_tr_all_3m: int = None
-    cnt_tr_top_up_3m: int = None
-    cnt_tr_cash_3m: int = None
-    cnt_tr_buy_3m: int = None
-    cnt_tr_mobile_3m: int = None
-    cnt_tr_oil_3m: int = None
-    cnt_tr_on_card_3m: int = None
-    cnt_tr_service_3m: int = None
-    cnt_zp_12m: int = None
-    sum_zp_12m: float = None
-    limit_exchange_count: int = None
-    max_outstanding_amount_6m: float = None
-    avg_outstanding_amount_3m: float = None
-    cnt_dep_act: int = None
-    sum_dep_now: float = None
-    avg_dep_avg_balance_1month: float = None
-    max_dep_avg_balance_3month: float = None
-    app_vehicle_ind: int = None
-    app_position_type_nm: str = None
-    visit_purposes: str = None
-    qnt_months_from_last_visit: int = None
-    super_clust: str
-    product: str
-    channel: str
 
 
 class UserCredentials(pydantic.BaseModel):
@@ -206,6 +177,7 @@ async def change_result(
 
 @app.post("/api/v1/data")
 async def read_item(credentials : Annotated[HTTPBasicCredentials, 
+<<<<<<< HEAD
                                             Depends(security)], client: Client, 
 ):    
     def replace_phone_number_in_ad_text(self, text):
@@ -215,6 +187,10 @@ async def read_item(credentials : Annotated[HTTPBasicCredentials,
         text = re.sub('\[номер\]', bank_phone_number, text)
         return re.sub(pattern, bank_phone_number, text)
 
+=======
+                                            Depends(security)], user: User, 
+):      
+>>>>>>> 0d1de1f (Add files via upload)
     con = connect_db(settings_DB)
     cur = con.cursor()
     cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s",
@@ -222,6 +198,7 @@ async def read_item(credentials : Annotated[HTTPBasicCredentials,
     admin_user = cur.fetchone()
 
     if admin_user:
+<<<<<<< HEAD
         print(client)
         # валидация
         if client.product not in PRODUCTS:
@@ -238,6 +215,13 @@ async def read_item(credentials : Annotated[HTTPBasicCredentials,
             "top_p": 0.9,
             "temperature": 0.2,
             "repeat_penalty": 1.1
+=======
+        user_data_dict = {
+            "user_id": user.user_id,
+            "user_data": user.user_data.model_dump(),
+            "product_data": user.product_data,
+            "channel_data": user.channel_data,
+>>>>>>> 0d1de1f (Add files via upload)
         }
 
         response = requests.post("http://model:8000/generate", json=query)
@@ -256,8 +240,12 @@ async def read_item(credentials : Annotated[HTTPBasicCredentials,
         con.commit()
         cur.close()
         con.close()
+<<<<<<< HEAD
 
         return {"advertisement": response_data["text"]}
+=======
+        return user
+>>>>>>> 0d1de1f (Add files via upload)
     else:
         cur.close()
         con.close()
