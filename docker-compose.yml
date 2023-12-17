@@ -33,3 +33,16 @@ services:
     depends_on:
       - backend
 
+  caddy:
+    image: caddy:alpine
+    restart: always
+    environment:
+      DOMAIN: $ECS_DOMAIN
+      EMAIL: $EMAIL
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./Caddyfile:/etc/caddy/Caddyfile"
+      - "caddy_data:/data"
+      - "caddy_config:/config"
