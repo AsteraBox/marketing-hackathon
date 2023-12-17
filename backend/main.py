@@ -1,3 +1,5 @@
+import re
+
 import pydantic
 import psycopg2
 import json
@@ -7,6 +9,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, Path
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 from fastapi import HTTPException
 
+from model.promtsgenerator import promtsgenerator
 
 app = FastAPI()
 
@@ -131,7 +134,7 @@ def all_record():
     cur.close()
     con.close()
     sorted_info_texts = sorted(info_texts, key=lambda x: x[0])
-    
+
     response_json = {"total": len(info_texts), "records": []}
 
     for info_text in sorted_info_texts:
@@ -153,11 +156,12 @@ def get_info_texts_psycopg2(cursor):
 
 
 @app.get("/texts")
-async def get_all_text( credentials : Annotated[HTTPBasicCredentials, 
-                                            Depends(security)], page: int = 0):
+async def get_all_text(credentials: Annotated[HTTPBasicCredentials,
+Depends(security)], page: int = 0):
     con = connect_db(settings_DB)
     cur = con.cursor()
-    cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s", (credentials.username, credentials.password))
+    cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s",
+                (credentials.username, credentials.password))
     admin_user = cur.fetchone()
     cur.close()
     con.close()
@@ -175,13 +179,14 @@ async def get_all_text( credentials : Annotated[HTTPBasicCredentials,
 
 @app.put("/texts/{id}")
 async def change_result(
-    credentials : Annotated[HTTPBasicCredentials, 
-                                            Depends(security)],
-    id: int
+        credentials: Annotated[HTTPBasicCredentials,
+        Depends(security)],
+        id: int
 ):
     con = connect_db(settings_DB)
     cur = con.cursor()
-    cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s", (credentials.username, credentials.password))
+    cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s",
+                (credentials.username, credentials.password))
     admin_user = cur.fetchone()
     if admin_user:
         cur.execute(f"UPDATE info_text SET result = True WHERE id = {id}")
@@ -202,9 +207,17 @@ async def change_result(
 async def read_item(credentials : Annotated[HTTPBasicCredentials, 
                                             Depends(security)], client: Client, 
 ):    
+    def replace_phone_number_in_ad_text(self, text):
+        pattern = r'^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$'
+        bank_phone_number = '8 800 100 07 01'
+        text = re.sub(pattern, bank_phone_number, text)
+        text = re.sub('\[номер\]', bank_phone_number, text)
+        return re.sub(pattern, bank_phone_number, text)
+
     con = connect_db(settings_DB)
     cur = con.cursor()
-    cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s", (credentials.username, credentials.password))
+    cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s",
+                (credentials.username, credentials.password))
     admin_user = cur.fetchone()
 
     if admin_user:
@@ -216,6 +229,7 @@ async def read_item(credentials : Annotated[HTTPBasicCredentials,
             raise HTTPException(status_code=400, detail="Unknown channel name")
         # используем поля в client (напр., client.gender) для доступа к информации о клиенте, продукте и канале
         # TODO: 
+        promt = promtsgenerator.generate_personalized_promt(client.product, "", client.channel, dict(client))
         text = "Example text"
         # TODO:
         cur.execute("INSERT INTO info_text (json_input, text, result) VALUES (%s, %s, %s)",
