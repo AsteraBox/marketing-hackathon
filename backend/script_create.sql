@@ -29,6 +29,9 @@ CREATE TABLE public.admin (
     password text
 );
 
+-- Inserting a user record
+INSERT INTO public.admin (username, password) VALUES ('admin', 'adminpass');
+
 
 ALTER TABLE public.admin OWNER TO postgres;
 
