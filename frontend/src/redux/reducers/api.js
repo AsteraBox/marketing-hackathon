@@ -9,7 +9,7 @@ export const api = createApi({
             if (credentials) {
                 const { username, password } = credentials;
                 const token = username + ":" + password;
-                headers.set("Authorization", "Basic " + btoa(token));
+                headers.set("Authorization", "Basic " + btoa(unescape(encodeURIComponent(token))));
             }
             return headers;
         },
