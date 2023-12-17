@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 
 import { api, useGetTextsQuery, useConfirmTextMutation } from "../redux/reducers/api";
+import { useDispatch } from "react-redux";
 
 import { Button, Pagination, Table } from "antd";
-import { useDispatch } from "react-redux";
+import { CheckCircleFilled } from '@ant-design/icons';
 
 export default () => {
     const [page, setPage] = useState(1);
@@ -33,7 +34,7 @@ export default () => {
             <Button size="small" onClick={() => onClick(el.id)}>
                 Подтвердить
             </Button>
-        ),
+        ) || <CheckCircleFilled style={{ color: "#27AE60", fontSize: "1.4em" }} />,
     })) || [];
 
     // Columns
@@ -52,6 +53,7 @@ export default () => {
             title: "Подвердить",
             dataIndex: "button",
             key: "button",
+            align: "center"
         },
     ];
 
