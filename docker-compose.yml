@@ -55,7 +55,7 @@ services:
       context: ./model
     restart: always
     volumes:
-      - "/data/marketing_weights/:/weights/"
+      - "/data/marketing_weights/:/app/weights/"
 
 volumes:
   caddy_data:
