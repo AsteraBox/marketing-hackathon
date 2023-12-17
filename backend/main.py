@@ -10,7 +10,7 @@ from fastapi.security import HTTPBasicCredentials, HTTPBasic
 from fastapi import HTTPException
 
 from settings_db import settings_DB
-from model.promtsgenerator import promtsgenerator
+from promtsgenerator import promtsgenerator
 
 app = FastAPI()
 
