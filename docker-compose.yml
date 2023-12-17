@@ -9,11 +9,11 @@ services:
     depends_on:
       - postgres
     environment:
-      - username_db = "postgres"
-      - password = $POSTGRES_PASSWORD
-      - host = "postgres"
-      - port = 5432
-      - database = "marketing-llm"
+      username_db: "postgres"
+      password: $POSTGRES_PASSWORD
+      host: "postgres"
+      port: 5432
+      database: "postgres"
     ports:
       - "8080:8000"
 
