@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { api, useGetTextsQuery } from "../redux/reducers/api";
 
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Form, Input, Typography } from "antd";
 
 export default () => {
@@ -12,7 +13,7 @@ export default () => {
     const dispatch = useDispatch();
 
     // RTK
-    const { isLoading, isSuccess, error } = useGetTextsQuery(1, {
+    const { isSuccess, error } = useGetTextsQuery(1, {
         skip: !credentials,
     });
 
@@ -28,62 +29,36 @@ export default () => {
     return (
         <Form
             name="basic"
-            labelCol={{
-                span: 8,
-            }}
-            wrapperCol={{
-                span: 16,
-            }}
             style={{
                 width: "100%",
-                maxWidth: 320,
+                maxWidth: 240,
                 margin: "auto"
             }}
             onFinish={onFinish}
             autoComplete="off"
         >
             <Form.Item
-                label="Логин"
                 name="username"
-                rules={[
-                    {
-                        required: true,
-                    },
-                ]}
+                rules={[{ required: true, message: 'Введите имя пользователя!' }]}
             >
-                <Input />
+                <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Логин" />
             </Form.Item>
 
             <Form.Item
-                label="Пароль"
                 name="password"
-                rules={[
-                    {
-                        required: true,
-                    },
-                ]}
+                rules={[{ required: true, message: 'Введите пароль!' }]}
             >
-                <Input.Password />
+                <Input prefix={<LockOutlined className="site-form-item-icon" />} type="password" placeholder="Пароль" />
             </Form.Item>
 
             {credentials && !authorized && error && (
-                <Form.Item
-                    wrapperCol={{
-                        offset: 8,
-                        span: 16,
-                    }}
-                >
-                    <Typography.Text type="danger">Ошибка: {error?.status == 401 ? "неверный логин или пароль" : "неизвестная ошибка"} </Typography.Text>
+                <Form.Item>
+                    <Typography.Text type="danger" stype={{ margin: 0 }}>Ошибка: {error?.status == 401 ? "неверный логин или пароль" : "неизвестная ошибка"} </Typography.Text>
                 </Form.Item>
             )}
 
-            <Form.Item
-                wrapperCol={{
-                    offset: 8,
-                    span: 16,
-                }}
-            >
-                <Button type="primary" htmlType="submit">
+            <Form.Item>
+                <Button type="primary" htmlType="submit" style={{ width: "100%" }}>
                     Войти
                 </Button>
             </Form.Item>
