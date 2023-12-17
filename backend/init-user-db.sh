@@ -33,6 +33,9 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
         password text
     );
 
+    -- Inserting a user record
+    INSERT INTO public.admin (username, password) VALUES ('admin', 'adminpass');
+
 
     ALTER TABLE public.admin OWNER TO postgres;
 
