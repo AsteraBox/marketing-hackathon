@@ -25,8 +25,8 @@ export default () => {
         }
     }
 
-    // Fromat data
-    const dataSource = data.records?.map((el, index) => ({
+    // Format data
+    const dataSource = isSuccess && data.records?.map((el, index) => ({
         ...el,
         key: index,
         button: !el.confirmed && (
