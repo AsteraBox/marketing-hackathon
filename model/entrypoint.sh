@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ -f /weights/model-q4_K.gguf ]; then
+if [ -f /app/weights/model-q4_K.gguf ]; then
   echo "Weigths file exists, starting app..."
 else
   echo "Weigts file does not exist, downloading..."
