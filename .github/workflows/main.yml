@@ -16,8 +16,7 @@ jobs:
         run: >
           docker compose build
           --build-arg REACT_APP_API_URL=${{ vars.REACT_APP_API_URL }}
-          --no-cache
-
+          
   run_project:
     name: Run project
     runs-on: [self-hosted, ecs-f976]
