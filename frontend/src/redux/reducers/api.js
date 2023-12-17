@@ -22,7 +22,6 @@ export const api = createApi({
                     page
                 },
             }),
-            providesTags: ['Text'],
         }),
         confirmText: builder.mutation({
             query: (id) => ({

@@ -6,14 +6,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { api, useGetTextsQuery } from "../redux/reducers/api";
 
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Typography } from "antd";
+import { Button, Form, Input, Typography, Spin } from "antd";
 
 export default () => {
     const { credentials, authorized } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
 
     // RTK
-    const { isSuccess, error } = useGetTextsQuery(1, {
+    const { isLoading, isSuccess, error } = useGetTextsQuery(1, {
         skip: !credentials,
     });
 
@@ -25,6 +25,10 @@ export default () => {
     useEffect(() => {
         dispatch(setAuthorized(isSuccess));
     }, [isSuccess]);
+
+    if (isLoading) {
+        return <Spin tip="Загрузка..." />
+    }
 
     return (
         <Form
