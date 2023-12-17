@@ -1,5 +1,6 @@
 {$DOMAIN} {
   tls {$EMAIL}
   reverse_proxy /api* backend:8000
+  reverse_proxy /docs* backend:8000
   reverse_proxy frontend:80
 }
