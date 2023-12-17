@@ -1,14 +1,15 @@
 import re
-
 import pydantic
 import psycopg2
 import json
-from settings_db import settings_DB
+import requests
+
 from typing import Annotated
 from fastapi import FastAPI, Depends, HTTPException, status, Path
 from fastapi.security import HTTPBasicCredentials, HTTPBasic
 from fastapi import HTTPException
 
+from settings_db import settings_DB
 from model.promtsgenerator import promtsgenerator
 
 app = FastAPI()
@@ -229,11 +230,26 @@ async def read_item(credentials : Annotated[HTTPBasicCredentials,
             raise HTTPException(status_code=400, detail="Unknown channel name")
         # используем поля в client (напр., client.gender) для доступа к информации о клиенте, продукте и канале
         # TODO: 
-        promt = promtsgenerator.generate_personalized_promt(client.product, "", client.channel, dict(client))
-        text = "Example text"
+        example_promt = promtsgenerator.generate_personalized_promt(client.product, "", client.channel, dict(client))
+
+        query = {
+            "text": example_promt,
+            "top_k": 30,
+            "top_p": 0.9,
+            "temperature": 0.2,
+            "repeat_penalty": 1.1
+        }
+
+        response = requests.post("http://model:8000/generate", json=query)
+
+        if response.status_code == 200:
+            response_data = response.json()
+        else:
+            print(f"Ошибка при запросе модели: {response.status_code}")
+
         # TODO:
         cur.execute("INSERT INTO info_text (json_input, text, result) VALUES (%s, %s, %s)",
-        (json.dumps(dict(client)), text, False),
+        (json.dumps(dict(client)), response_data["text"], False),
     )
 
         con.commit()
