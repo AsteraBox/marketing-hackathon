@@ -1,0 +1,35 @@
+version: "3"
+
+services:
+  backend:
+    image: marketing-llm-api:latest
+    restart: always
+    build:
+      context: ./backend
+    depends_on:
+      - postgres
+    environment:
+      - username_db = "postgres"
+      - password = $POSTGRES_PASSWORD
+      - host = "postgres"
+      - port = 5432
+      - database = "marketing-llm"
+    ports:
+      - "8080:8000"
+
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    volumes:
+      - ./backend/init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+
+  frontend:
+    image: marketing-llm-frontend:latest
+    build:
+      context: ./frontend
+    depends_on:
+      - backend
+
