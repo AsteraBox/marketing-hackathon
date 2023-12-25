@@ -6,7 +6,7 @@ jobs:
   build_images:
     name: Build images
     environment: dev
-    runs-on: [self-hosted, smr-dev]
+    runs-on: [self-hosted, dev-server]
     timeout-minutes: 10
     steps:
       - name: Check for actual
@@ -22,7 +22,7 @@ jobs:
   run_project:
     name: Run project
     environment: dev
-    runs-on: [self-hosted, smr-dev]
+    runs-on: [self-hosted, dev-server]
     timeout-minutes: 10
     needs: build_images
     steps:
