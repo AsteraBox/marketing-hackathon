@@ -24,7 +24,7 @@ services:
     environment:
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
     ports:
-      - "5433:5432"
+      - "$POSTGRES_EXTERNAL_PORT:5432"
     volumes:
       - ./backend/script_create.sql:/docker-entrypoint-initdb.d/init-user-db.sql
       - /data/marketing_postgres:/var/lib/postgresql/data
