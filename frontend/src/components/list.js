@@ -3,8 +3,7 @@ import React, { useState } from "react";
 import { api, useGetTextsQuery, useConfirmTextMutation } from "../redux/reducers/api";
 import { useDispatch } from "react-redux";
 
-import { Button, Pagination, Table } from "antd";
-import { CheckCircleFilled } from '@ant-design/icons';
+import { Pagination, Table, Switch } from "antd";
 
 export default () => {
     const [page, setPage] = useState(1);
@@ -15,11 +14,11 @@ export default () => {
     const [confirm] = useConfirmTextMutation();
 
     // Click handler
-    const onClick = async (id) => {
+    const onChange = async (id) => {
         try {
             await confirm(id).unwrap();
             dispatch(api.util.updateQueryData("getTexts", page, (data) => {
-                data.records = data.records?.map(el => ({ ...el, confirmed: el.confirmed || el.id === id }));
+                data.records = data.records?.map(el => ({ ...el, confirmed: el.id === id ? !el.confirmed : el.confirmed }));
             }));
         } catch (error) {
             console.log(error);
@@ -30,11 +29,7 @@ export default () => {
     const dataSource = isSuccess && data.records?.map((el, index) => ({
         ...el,
         key: index,
-        button: !el.confirmed && (
-            <Button size="small" onClick={() => onClick(el.id)}>
-                Подтвердить
-            </Button>
-        ) || <CheckCircleFilled style={{ color: "#27AE60", fontSize: "1.4em" }} />,
+        confirm: <Switch checked={el.confirmed} onChange={() => onChange(el.id)} />,
     })) || [];
 
     // Columns
@@ -51,8 +46,8 @@ export default () => {
         },
         {
             title: "Подтвердить",
-            dataIndex: "button",
-            key: "button",
+            dataIndex: "confirm",
+            key: "confirm",
             align: "center"
         },
     ];
