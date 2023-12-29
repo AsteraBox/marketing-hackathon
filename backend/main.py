@@ -1,17 +1,15 @@
-import re
-import pydantic
-import psycopg2
 import json
-import requests
-
+import re
 from typing import Annotated
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import HTTPBasicCredentials, HTTPBasic
 
-from pyd_models import User
-
-from settings_db import settings_DB
+import psycopg2
+import pydantic
+import requests
+from fastapi import Depends, FastAPI, HTTPException, Path, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from promtsgenerator import promtsgenerator
+from pyd_models import Client
+from settings_db import settings_DB
 
 app = FastAPI()
 
@@ -62,7 +60,7 @@ def connect_db(settings_DB):
         user=settings_DB.admin,
         password=settings_DB.password,
         host=settings_DB.host,
-        port=settings_DB.port
+        port=settings_DB.port,
     )
     return con
 
@@ -88,9 +86,12 @@ def page_record(page: int = 1, items_per_page: int = 10):
     response_json = {"total": len(info_texts), "records": []}
 
     for info_text in paginated_records:
-        print(f"ID: {info_text[0]}, JSON Input: {info_text[1]}, Text: {info_text[2]}, Result: {info_text[3]}")
+        print(
+            f"ID: {info_text[0]}, JSON Input: {info_text[1]}, Text: {info_text[2]}, Result: {info_text[3]}"
+        )
         record_object = {
             "id": info_text[0],
+            "json_input": info_text[1],
             "text": info_text[2],
             "confirmed": info_text[3],
         }
@@ -110,9 +111,12 @@ def all_record():
     response_json = {"total": len(info_texts), "records": []}
 
     for info_text in sorted_info_texts:
-        print(f"ID: {info_text[0]}, JSON Input: {info_text[1]}, Text: {info_text[2]}, Result: {info_text[3]}")
+        print(
+            f"ID: {info_text[0]}, JSON Input: {info_text[1]}, Text: {info_text[2]}, Result: {info_text[3]}"
+        )
         record_object = {
             "id": info_text[0],
+            "json_input": info_text[1],
             "text": info_text[2],
             "confirmed": info_text[3],
         }
@@ -128,12 +132,15 @@ def get_info_texts_psycopg2(cursor):
 
 
 @app.get("/texts")
-async def get_all_text(credentials: Annotated[HTTPBasicCredentials,
-Depends(security)], page: int = 0):
+async def get_all_text(
+    credentials: Annotated[HTTPBasicCredentials, Depends(security)], page: int = 0
+):
     con = connect_db(settings_DB)
     cur = con.cursor()
-    cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s",
-                (credentials.username, credentials.password))
+    cur.execute(
+        "SELECT * FROM admin WHERE username = %s AND password = %s",
+        (credentials.username, credentials.password),
+    )
     admin_user = cur.fetchone()
     cur.close()
     con.close()
@@ -151,20 +158,35 @@ Depends(security)], page: int = 0):
 
 @app.put("/texts/{id}")
 async def change_result(
-        credentials: Annotated[HTTPBasicCredentials,
-        Depends(security)],
-        id: int
+    credentials: Annotated[HTTPBasicCredentials, Depends(security)], id: int
 ):
     con = connect_db(settings_DB)
     cur = con.cursor()
-    cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s",
-                (credentials.username, credentials.password))
+    cur.execute(
+        "SELECT * FROM admin WHERE username = %s AND password = %s",
+        (credentials.username, credentials.password),
+    )
     admin_user = cur.fetchone()
+
     if admin_user:
-        cur.execute(f"UPDATE info_text SET result = True WHERE id = {id}")
-        con.commit()
-        con.close()
-        cur.close()
+        cur.execute("SELECT * FROM info_text WHERE id = %s", (id,))
+        existing_text = cur.fetchone()
+        if existing_text:
+            cur.execute(f"UPDATE info_text SET result = NOT result WHERE id = {id}")
+            con.commit()
+            cur.close()
+            con.close()
+            return HTTPException(
+                status_code=status.HTTP_200_OK,
+                detail=f"Information about the validity of the text has been changed",
+            )
+        else:
+            cur.close()
+            con.close()
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Text with id {id} not found",
+            )
     else:
         cur.close()
         con.close()
@@ -176,76 +198,68 @@ async def change_result(
 
 
 @app.post("/api/v1/data")
-async def read_item(credentials : Annotated[HTTPBasicCredentials, 
-<<<<<<< HEAD
-                                            Depends(security)], client: Client, 
-):    
-    def replace_phone_number_in_ad_text(self, text):
-        pattern = r'^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$'
-        bank_phone_number = '8 800 100 07 01'
-        text = re.sub(pattern, bank_phone_number, text)
-        text = re.sub('\[номер\]', bank_phone_number, text)
-        return re.sub(pattern, bank_phone_number, text)
-
-=======
-                                            Depends(security)], user: User, 
-):      
->>>>>>> 0d1de1f (Add files via upload)
+async def read_item(
+    credentials: Annotated[HTTPBasicCredentials, Depends(security)],
+    client: Client,
+):
     con = connect_db(settings_DB)
     cur = con.cursor()
-    cur.execute("SELECT * FROM admin WHERE username = %s AND password = %s",
-                (credentials.username, credentials.password))
+    cur.execute(
+        "SELECT * FROM admin WHERE username = %s AND password = %s",
+        (credentials.username, credentials.password),
+    )
     admin_user = cur.fetchone()
 
     if admin_user:
-<<<<<<< HEAD
         print(client)
         # валидация
-        if client.product not in PRODUCTS:
+        if client.product_data not in PRODUCTS:
             raise HTTPException(status_code=400, detail="Unknown product name")
-        if client.channel not in CHANNELS:
+        if client.channel_data not in CHANNELS:
             raise HTTPException(status_code=400, detail="Unknown channel name")
         # используем поля в client (напр., client.gender) для доступа к информации о клиенте, продукте и канале
-        # TODO: 
-        example_promt = promtsgenerator.generate_personalized_promt(client.product, "", client.channel, dict(client))
+        # TODO:
+        example_promt = promtsgenerator.generate_personalized_promt(
+            client.product_data, "", client.channel_data, dict(client)
+        )
 
         query = {
             "text": example_promt,
             "top_k": 30,
             "top_p": 0.9,
             "temperature": 0.2,
-            "repeat_penalty": 1.1
-=======
-        user_data_dict = {
-            "user_id": user.user_id,
-            "user_data": user.user_data.model_dump(),
-            "product_data": user.product_data,
-            "channel_data": user.channel_data,
->>>>>>> 0d1de1f (Add files via upload)
+            "repeat_penalty": 1.1,
         }
-
         response = requests.post("http://model:8000/generate", json=query)
 
         if response.status_code == 200:
             response_data = response.json()
         else:
             print(f"Ошибка при запросе модели: {response.status_code}")
-            raise HTTPException(status_code=500, detail=f"Ошибка при запросе модели: {response.status_code}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Ошибка при запросе модели: {response.status_code}",
+            )
 
         # TODO:
-        cur.execute("INSERT INTO info_text (json_input, text, result) VALUES (%s, %s, %s)",
-            (json.dumps(dict(client)), response_data["text"], False),
+
+        user_data_dict = {
+            "user_id": client.user_id,
+            "user_data": client.user_data.model_dump(),
+            "product_data": client.product_data,
+            "channel_data": client.channel_data,
+        }
+
+        cur.execute(
+            "INSERT INTO info_text (json_input, text, result) VALUES (%s, %s, %s)",
+            (json.dumps(dict(user_data_dict)), response_data["text"], False),
         )
 
         con.commit()
         cur.close()
         con.close()
-<<<<<<< HEAD
 
         return {"advertisement": response_data["text"]}
-=======
-        return user
->>>>>>> 0d1de1f (Add files via upload)
     else:
         cur.close()
         con.close()

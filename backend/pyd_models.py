@@ -1,5 +1,6 @@
+from typing import Union
+
 from pydantic import BaseModel
-from typing import Union, Union
 
 
 class UserData(BaseModel):
@@ -30,7 +31,7 @@ class UserData(BaseModel):
     super_clust: Union[str, None]
 
 
-class User(BaseModel):
+class Client(BaseModel):
     user_id: int
     user_data: Union[UserData, None]
     product_data: str

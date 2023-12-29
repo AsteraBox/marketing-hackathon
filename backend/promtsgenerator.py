@@ -7,7 +7,7 @@ class PromtsGenerator:
         "MOB_BANNER": "рекламный текст для баннера в мобильном приложении",
         "OFFICE_BANNER": "рекламный текст для баннера для менеджера в доп. офисе",
         "MOBILE_CHAT": "рекламный текст для предложения в чате мобильного банке",
-        "KND": "рекламный текст для курьера на дом"
+        "KND": "рекламный текст для курьера на дом",
     }
     general_products = {
         "ПК": "Классический потребительский кредит",
@@ -31,7 +31,7 @@ class PromtsGenerator:
         "TRUST": "Доверительное управление",
         "OMS": "Обезличенный металлический счет",
         "IZP": "Индивидуальный зарплатный проект",
-        "CURR_EXC": "Обмен валюты"
+        "CURR_EXC": "Обмен валюты",
     }
 
     def generate_basic_promt(self, service_key, sevice_features, channel_type_key):
@@ -41,40 +41,53 @@ class PromtsGenerator:
         return promt
 
     def _get_user_features_text(self, service_key, user_features):
-        user_feature_text = ' клиента'
+        user_feature_text = " клиента"
 
-        if user_features['age'] is not None:
-            user_feature_text += f' {int(user_features["age"])} лет'
+        if user_features["user_data"].age is not None:
+            age = user_features["user_data"].age
+            user_feature_text += f" {int(age)} лет"
 
-        if user_features['reg_region_nm'] is not None:
-            user_feature_text += f' из {user_features["reg_region_nm"]}'
+        if user_features["user_data"].reg_region_nm is not None:
+            reg_region_nm = user_features["user_data"].reg_region_nm
+            user_feature_text += f" из {reg_region_nm}"
 
-        if service_key == 'AUTO' or 'AUTO_SCR':
-            if user_features['app_vehicle_ind'] is not None:
-                user_feature_text += (' с автомобилем' if user_features['app_vehicle_ind'] else ' без автомобиля')
+        if service_key == "AUTO" or "AUTO_SCR":
+            if user_features["user_data"].app_vehicle_ind is not None:
+                user_feature_text += (
+                    " с автомобилем"
+                    if user_features["user_data"].app_vehicle_ind
+                    else " без автомобиля"
+                )
 
-        if service_key == 'CC':
-            if user_features['limit_exchange_count'] is not None:
-                user_feature_text += f' с {user_features["limit_exchange_count"]} изменениями лимита'
+        if service_key == "CC":
+            if user_features["user_data"].limit_exchange_count is not None:
+                limit = user_features["user_data"].limit_exchange_count
+                user_feature_text += f" с {limit} изменениями лимита"
 
-        if service_key == 'TOPUP' or service_key == 'REFIN':
-            if user_features['avg_outstanding_amount_3m'] is not None:
-                user_feature_text += f' cо средней задолженностью по основному долгу за 3 месяца'
+        if service_key == "TOPUP" or service_key == "REFIN":
+            if user_features["user_data"].avg_outstanding_amount_3m is not None:
+                avg_outstanding_amount_3m = user_features[
+                    "user_data"
+                ].avg_outstanding_amount_3m
+                user_feature_text += f" cо средней задолженностью по основному долгу за 3 месяца: {avg_outstanding_amount_3m}"
 
         return user_feature_text
 
-    def generate_personalized_promt(self, service_key, sevice_features, channel_type_key, user_features):
+    def generate_personalized_promt(
+        self, service_key, sevice_features, channel_type_key, user_features
+    ):
         service = self.general_products[service_key]
         channel_type = self.connection_channels[channel_type_key]
         user_features_text = self._get_user_features_text(service_key, user_features)
         promt = f"Сгенерируй {channel_type} для {user_features_text}. Прорекламируй услугу '{service}'. {sevice_features}. "
         return promt
 
+
 promtsgenerator = PromtsGenerator()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     promts_generator = PromtsGenerator()
     # features = 'Карта «Мир» с кэшбэком до 30%'
     # features = 'Семейная ипотека с господдержкой для семьи с детьми'
-    features = 'Быстрый кредит до 7 миллионов рублей, нужен только паспорт. Ставка от 3.9% годовых'
-    print(promts_generator.generate_basic_promt('ПК', features, 'SMS'))
+    features = "Быстрый кредит до 7 миллионов рублей, нужен только паспорт. Ставка от 3.9% годовых"
+    print(promts_generator.generate_basic_promt("ПК", features, "SMS"))
