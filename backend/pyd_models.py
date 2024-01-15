@@ -32,7 +32,6 @@ class UserData(BaseModel):
 
 
 class Client(BaseModel):
-    user_id: int
     user_data: Union[UserData, None]
     product_data: str
     channel_data: str

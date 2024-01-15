@@ -220,7 +220,7 @@ async def read_item(
         # используем поля в client (напр., client.gender) для доступа к информации о клиенте, продукте и канале
         # TODO:
         example_promt = promtsgenerator.generate_personalized_promt(
-            client.product_data, "", client.channel_data, dict(client)
+            client.product_data, client.channel_data, dict(client)
         )
 
         query = {
@@ -244,7 +244,6 @@ async def read_item(
         # TODO:
 
         user_data_dict = {
-            "user_id": client.user_id,
             "user_data": client.user_data.model_dump(),
             "product_data": client.product_data,
             "channel_data": client.channel_data,
