@@ -3,3 +3,4 @@ psycopg2-binary
 uvicorn
 pydantic-settings
 requests
+pandas
